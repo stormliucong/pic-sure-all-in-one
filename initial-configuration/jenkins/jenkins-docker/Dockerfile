@@ -1,5 +1,19 @@
 FROM jenkins/jenkins:2.377
 
+# Retrieve the proxy build-time arguments
+ARG MAVEN_OPTS
+
+ARG http_proxy
+ARG https_proxy
+ARG no_proxy
+
+
+# Set the proxy environment variables
+ENV MAVEN_OPTS=$MAVEN_OPTS
+ENV http_proxy=$http_proxy
+ENV https_proxy=$https_proxy
+ENV no_proxy=$no_proxy
+
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 
 COPY config.xml /var/jenkins_home/config.xml
@@ -32,4 +46,4 @@ RUN apt-get install jq -y
 
 RUN apt-get -y install uuid-runtime
 
-RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
+RUN java ${MAVEN_OPTS} -jar /opt/jenkins-plugin-manager.jar -f /usr/share/jenkins/ref/plugins.txt
